@@ -13,6 +13,10 @@ import Foundation
 // https://www.mathsisfun.com/roman-numerals.html#convert
 
 enum RomanNumeral: String {
+    enum Errors: Error {
+        case invalidInput
+    }
+    
     case I, V, X, L, C, D, M
     
     var value: Int {
@@ -39,7 +43,7 @@ enum RomanNumeral: String {
         }
     }
     
-    static func extractChain(_ input: inout [RomanNumeral]) -> ([RomanNumeral], Bool) {
+    static func extractChain(_ input: inout [RomanNumeral]) throws -> ([RomanNumeral], Bool) {
         var result = [RomanNumeral]()
         var firstSymbol: RomanNumeral? = nil
         var ascending: Bool? = nil
@@ -73,7 +77,27 @@ enum RomanNumeral: String {
         if result.count > 1, ascending ?? false {
             shouldSubtractValues = result.first != result.last
         }
+        guard validateChain(chain: result) else {
+            throw Errors.invalidInput
+        }
         return (result, shouldSubtractValues)
+    }
+    
+    static func validateChain(chain: [RomanNumeral]) -> Bool {
+        guard chain.count > 3 else { return true }
+        var check = chain.first!
+        var count = 0
+        for numeral in chain {
+            if numeral == check {
+                count += 1
+            } else {
+                check = numeral
+                count = 1
+            }
+            if check != .M, count > 3 { return false }
+        }
+        
+        return count <= 3 || check == .M
     }
     
     static func sumChain(_ input: ([RomanNumeral], Bool)) -> Int {
@@ -104,19 +128,19 @@ enum RomanNumeral: String {
 
 
 extension String {
-    func convertFromRomanNumerals() -> Int {
+    func convertFromRomanNumerals() throws -> Int {
         var numerals = self.compactMap { RomanNumeral(rawValue: String($0)) }
         var value = 0
         
         while !numerals.isEmpty {
-            value += RomanNumeral.sumChain(RomanNumeral.extractChain(&numerals))
+            value += RomanNumeral.sumChain(try RomanNumeral.extractChain(&numerals))
         }
         
         return value
     }
     
-    func addRomanNumeral(_ value: String) -> String {
-        return (self.convertFromRomanNumerals() + value.convertFromRomanNumerals()).convertToRomanNumerals()
+    func addRomanNumeral(_ value: String) throws -> String {
+        return (try self.convertFromRomanNumerals() + value.convertFromRomanNumerals()).convertToRomanNumerals()
     }
 }
 

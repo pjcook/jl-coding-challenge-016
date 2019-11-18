@@ -26,9 +26,17 @@ class RomanNumeralsTests: XCTestCase {
     ]
         
     func test_convert_roman_to_decimal() {
-        for (key, value) in testValues {
-            XCTAssertEqual(key, value.convertFromRomanNumerals())
+        do {
+            for (key, value) in testValues {
+                XCTAssertEqual(key, try value.convertFromRomanNumerals())
+            }
+        } catch {
+            XCTFail()
         }
+    }
+    
+    func test_can_handle_invalid_chains() {
+        XCTAssertThrowsError(try "XVIIII".convertFromRomanNumerals())
     }
     
     func test_convert_decimal_to_roman() {
@@ -39,48 +47,76 @@ class RomanNumeralsTests: XCTestCase {
     
     func test_extractPart() {
         var input: [RomanNumeral] = [.V, .I, .I]
-        let (result, ascending) = RomanNumeral.extractChain(&input)
-        XCTAssertEqual(3, result.count)
-        XCTAssertFalse(ascending)
+        do {
+            let (result, ascending) = try RomanNumeral.extractChain(&input)
+            XCTAssertEqual(3, result.count)
+            XCTAssertFalse(ascending)
+        } catch {
+            XCTFail()
+        }
         
     }
     
     func test_extractPart2() {
         var input: [RomanNumeral] = [.I, .I, .V]
-        let (result, ascending) = RomanNumeral.extractChain(&input)
-        XCTAssertEqual(3, result.count)
-        XCTAssertTrue(ascending)
+        do {
+            let (result, ascending) = try RomanNumeral.extractChain(&input)
+            XCTAssertEqual(3, result.count)
+            XCTAssertTrue(ascending)
+        } catch {
+            XCTFail()
+        }
     }
 
     func test_extractPart4() {
         var input: [RomanNumeral] = [.M, .M, .C, .M, .L, .X, .X, .X, .V, .I, .I]
-        let (result, ascending) = RomanNumeral.extractChain(&input)
-        XCTAssertEqual(2, result.count)
-        XCTAssertFalse(ascending)
-        XCTAssertEqual(9, input.count)
+        do {
+            let (result, ascending) = try RomanNumeral.extractChain(&input)
+            XCTAssertEqual(2, result.count)
+            XCTAssertFalse(ascending)
+            XCTAssertEqual(9, input.count)
+        } catch {
+            XCTFail()
+        }
     }
     
     func test_sumPart() {
         var input: [RomanNumeral] = [.V, .I, .I]
-        let result = RomanNumeral.sumChain(RomanNumeral.extractChain(&input))
-        XCTAssertEqual(7, result)
+        do {
+            let result = RomanNumeral.sumChain(try RomanNumeral.extractChain(&input))
+            XCTAssertEqual(7, result)
+        } catch {
+            XCTFail()
+        }
     }
     
     func test_sumPart2() {
         var input: [RomanNumeral] = [.I, .V]
-        let result = RomanNumeral.sumChain(RomanNumeral.extractChain(&input))
-        XCTAssertEqual(4, result)
+        do {
+            let result = RomanNumeral.sumChain(try RomanNumeral.extractChain(&input))
+            XCTAssertEqual(4, result)
+        } catch {
+            XCTFail()
+        }
     }
     
     func test_adding_two_roman_numerals() {
         let origin = "VII" // 7
-        let result = origin.addRomanNumeral("VII") // 7
-        XCTAssertEqual("XIV", result) // 14
+        do {
+            let result = try origin.addRomanNumeral("VII") // 7
+            XCTAssertEqual("XIV", result) // 14
+        } catch {
+            XCTFail()
+        }
     }
     
     func test_adding_two_roman_numerals2() {
         let origin = "CXXIII" // 123
-        let result = origin.addRomanNumeral("CDLVI") // 456
-        XCTAssertEqual("DLXXIX", result) // 579
+        do {
+            let result = try origin.addRomanNumeral("CDLVI") // 456
+            XCTAssertEqual("DLXXIX", result) // 579
+        } catch {
+            XCTFail()
+        }
     }
 }
